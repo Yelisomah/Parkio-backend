@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      POSTGRES_DB: parkio
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - parkio-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d parkio"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - parkio-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/parkio
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TOKEN_BLACKLIST_STORE: redis
+      BOOKING_LOCK_ENABLED: "true"
+    ports:
+      - "${PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  parkio-postgres:
+  parkio-redis:

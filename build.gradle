@@ -1,0 +1,106 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.1.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.3'
+
+	// Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// JPA & PostgreSQL
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+	runtimeOnly  'io.jsonwebtoken:jjwt-impl:0.12.6'
+	runtimeOnly  'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// OpenAPI / Swagger UI
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
+	// Rate limiting — Bucket4j (standalone, no cache dependency)
+	implementation 'com.bucket4j:bucket4j_jdk17-core:8.18.0'
+
+	// Email (password reset)
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// Actuator — /actuator/health for load balancers & monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// Flyway — versioned DB migrations (replaces ddl-auto=update in prod)
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
+	// Redis — distributed token blacklist (multi-node logout support) and
+	// distributed slot locking (see DistributedLockService / tech-standards.md
+	// "Distributed locks go through Redis, never in-JVM locking")
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// PostGIS / Hibernate Spatial — geospatial radius search (Kiro design.md requirement 7)
+	// NOTE: version is left to Spring Boot's dependency-management BOM. If your
+	// Boot version's BOM doesn't manage this artifact, pin it explicitly to
+	// match your resolved hibernate-core version (they're released in lockstep).
+	implementation 'org.hibernate.orm:hibernate-spatial'
+
+	// MapStruct — DTO mapping (tech-standards.md: "DTOs are mapped from entities
+	// via MapStruct"). Added as the foundation; only ParkingLotMapper uses it so
+	// far — migrating every hand-written from()/to() method is a follow-up pass
+	// that needs a working compiler to verify safely, not done blind in this session.
+	implementation 'org.mapstruct:mapstruct:1.6.3'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+	// Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'com.h2database:h2'
+
+	// Testcontainers — required per tech-standards.md: "Any geospatial ... logic
+	// requires a Testcontainers-backed integration test against real
+	// PostgreSQL/PostGIS ... do not rely solely on mocked repositories/H2".
+	// Only ParkingLotNearbySearchIT uses these; the rest of the suite keeps
+	// using the fast in-memory H2 profile untouched.
+	testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+	testImplementation 'org.testcontainers:postgresql:1.20.4'
+
+	systemProp.org.gradle.internal.http.connectionTimeout=180000
+systemProp.org.gradle.internal.http.socketTimeout=180000
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
