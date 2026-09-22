@@ -96,9 +96,6 @@ dependencies {
 	// using the fast in-memory H2 profile untouched.
 	testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
 	testImplementation 'org.testcontainers:postgresql:1.20.4'
-
-	systemProp.org.gradle.internal.http.connectionTimeout=180000
-systemProp.org.gradle.internal.http.socketTimeout=180000
 }
 
 tasks.named('test') {

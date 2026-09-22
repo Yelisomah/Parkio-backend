@@ -6,15 +6,15 @@ WORKDIR /workspace
 
 COPY gradlew ./
 COPY gradle ./gradle
-COPY build.gradle settings.gradle ./
+COPY build.gradle settings.gradle gradle.properties ./
 
-RUN chmod +x gradlew
-
-RUN ./gradlew --no-daemon dependencies
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew --no-daemon dependencies
 
 COPY src ./src
 
-RUN ./gradlew --no-daemon clean bootJar
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew --no-daemon clean bootJar
 RUN executable_jar=$(find build/libs -maxdepth 1 -type f -name '*-SNAPSHOT.jar' ! -name '*-plain.jar' -print -quit) \
     && test -n "$executable_jar" \
     && cp "$executable_jar" /workspace/app.jar

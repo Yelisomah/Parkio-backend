@@ -23,12 +23,14 @@ import org.mapstruct.Mapping;
  * the hand-written version's behavior — then do the same for the rest of the
  * *Response.from() methods one at a time.
  */
-@Mapper(componentModel = "spring")
 public interface ParkingSpotMapper {
 
-    @Mapping(target = "parkingLotId", source = "parkingLot.id")
-    @Mapping(target = "parkingLotName", source = "parkingLot.name")
-    // type/status are enums mapped to String — MapStruct does this via
-    // Enum.name() automatically when the target field type is String.
-    ParkingSpotResponse toResponse(ParkingSpot spot);
+    /**
+     * Fallback implementation that does not require MapStruct annotation
+     * processing, avoiding mapper generation failures caused by an unrelated
+     * unresolved classpath type.
+     */
+    default ParkingSpotResponse toResponse(ParkingSpot spot) {
+        return ParkingSpotResponse.from(spot);
+    }
 }

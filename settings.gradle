@@ -1,7 +1,8 @@
-rootProject.name = 'parkio'
 pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
     }
 }
+
+rootProject.name = 'parkio'
