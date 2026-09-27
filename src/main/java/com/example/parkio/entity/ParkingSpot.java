@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "parking_spots",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"parking_lot_id", "spotNumber"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"parking_lot_id", "spot_number"}))
 @Getter
 @Setter
 @NoArgsConstructor
